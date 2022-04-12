@@ -58,8 +58,10 @@ export default class Cars extends SelectableList<Car> {
 
   public async componentDidMount(): Promise<void> {
     await super.componentDidMount();
-    const initialFilters = this.screenFilters?.getFilters();
-    this.setState({filters: initialFilters}, () => this.refresh(true));
+    // When filters are enabled, first refresh is triggered via onFiltersChanged
+    if (!this.screenFilters) {
+      this.refresh(true);
+    }
   }
 
   public setState = (
@@ -83,7 +85,8 @@ export default class Cars extends SelectableList<Car> {
   public async getCars(searchText: string, skip: number, limit: number): Promise<DataResult<Car>> {
     const { isModal } = this.props;
     try {
-      const userID = isModal ? this.props.userIDs?.join('|') : this.state.filters.users?.map(user => user.id).join('|');
+      const users = this.state.filters?.users;
+      const userID = isModal ? this.props.userIDs?.join('|') : users?.map(user => user.id).join('|');
       const params = {
         Search: searchText,
         WithUser: true,
@@ -128,19 +131,19 @@ export default class Cars extends SelectableList<Car> {
 
   public async refresh(showSpinner = false): Promise<void> {
     if (this.isMounted()) {
-      if (showSpinner) {
-        this.setState({...(Utils.isEmptyArray(this.state.cars) ? { loading: true } : { refreshing: true })});
-      }
-      const { skip, limit } = this.state;
-      // Refresh All
-      const cars = await this.getCars(this.searchText, 0, skip + limit);
-      const carsResult = cars ? cars.result : [];
-      // Set
-      this.setState({
-        loading: false,
-        cars: carsResult,
-        count: cars ? cars.count : 0,
-        refreshing: false
+      const newState = showSpinner ? {...(Utils.isEmptyArray(this.state.cars) ? {loading: true} : {refreshing: true})} : this.state;
+      this.setState(newState, async () => {
+        const { skip, limit } = this.state;
+        // Refresh All
+        const cars = await this.getCars(this.searchText, 0, skip + limit);
+        const carsResult = cars ? cars.result : [];
+        // Set
+        this.setState({
+          loading: false,
+          cars: carsResult,
+          count: cars ? cars.count : 0,
+          refreshing: false
+        });
       });
     }
   }
@@ -219,8 +222,8 @@ export default class Cars extends SelectableList<Car> {
           />
         )}
         <SimpleSearchComponent containerStyle={style.searchBarComponent} onChange={async (searchText) => this.search(searchText)} navigation={this.props.navigation} />
-        {!isModal && this.screenFilters?.canOpenModal() && (
-          <TouchableOpacity onPress={() => this.screenFilters?.openModal()}  style={style.filterButton}>
+        {!isModal && this.screenFilters?.canFilter() && (
+          <TouchableOpacity disabled={this.state.loading} onPress={() => this.screenFilters?.openModal()}  style={style.filterButton}>
             <Icon style={style.filterButtonIcon} type={'MaterialCommunityIcons'} name={areModalFiltersActive ? 'filter' : 'filter-outline'} />
           </TouchableOpacity>
         )}
