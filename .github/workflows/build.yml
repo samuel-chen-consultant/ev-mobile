@@ -58,6 +58,8 @@ jobs:
         cd ios && xcodebuild -workspace eMobility.xcworkspace -scheme eMobility -configuration Debug CODE_SIGNING_ALLOWED=NO
     - name: ios bundle
       run: npm run ios:bundle
+    - name: ios release
+      run: npm  run ios:release
     - name: archive the folder
       run: tar -czvf current.tar.gz ./
     - uses: actions/upload-artifact@v3
