@@ -50,6 +50,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: npm install
       run: npm clean-install
+<<<<<<< HEAD
     - name: npm run pod:install
       run: npm run pod:install
     - name: xcodebuild
@@ -60,8 +61,16 @@ jobs:
       run: npm run ios:bundle
     - name: ios release
       run: npm  run ios:release
+=======
+>>>>>>> parent of 0cd6b73e (bundling)
     - name: archive the folder
       run: tar -czvf current.tar.gz ./
+#    - name: npm run pod:install
+#      run: npm run pod:install
+#    - name: xcodebuild
+#      run: |
+#        npm run build:prepare
+#        cd ios && xcodebuild -workspace eMobility.xcworkspace -scheme eMobility -configuration Debug CODE_SIGNING_ALLOWED=NO
     - uses: actions/upload-artifact@v3
       with:
         name: my-current
