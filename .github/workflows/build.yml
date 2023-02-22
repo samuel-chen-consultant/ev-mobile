@@ -10,8 +10,34 @@ on:
       - master-qa
 
 jobs:
-#  Build-android:
-#    runs-on: ubuntu-latest
+  Build-android:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.13.0]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: NDK install
+      run: echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;22.1.7171670"
+    - name: npm install
+      run: npm ci
+    - name: npm run android:assembleDebug
+      run: |
+        npm run build:prepare
+        npm run android:assembleDebug
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: my-android
+        path: android/
+#  Build-ios:
+#    runs-on: macos-latest
 #
 #    strategy:
 #      matrix:
@@ -23,47 +49,15 @@ jobs:
 #      uses: actions/setup-node@v2
 #      with:
 #        node-version: ${{ matrix.node-version }}
-#    - name: NDK install
-#      run: echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;22.1.7171670"
 #    - name: npm install
-#      run: npm ci
-#    - name: npm run android:assembleDebug
+#      run: npm clean-install
+#    - name: npm run pod:install
+#      run: npm run pod:install
+#    - name: xcodebuild
 #      run: |
 #        npm run build:prepare
-#        npm run android:assembleDebug
-#
-#    - uses: actions/upload-artifact@v3
-#      with:
-#        name: my-android
-#        path: android/
-  Build-ios:
-    runs-on: macos-latest
+#        cd ios && xcodebuild -workspace eMobility.xcworkspace -scheme eMobility -configuration Debug CODE_SIGNING_ALLOWED=NO
 
-    strategy:
-      matrix:
-        node-version: [16.13.0]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: npm install
-      run: npm clean-install
-    - name: npm run pod:install
-      run: npm run pod:install
-    - name: xcodebuild
-      run: |
-        npm run build:prepare
-        cd ios && xcodebuild -workspace eMobility.xcworkspace -scheme eMobility -configuration Debug CODE_SIGNING_ALLOWED=NO
-    - name: ios bundle
-      run: npm run ios:bundle
-    - name: archive the folder
-      run: tar -czvf current.tar.gz ./
-    - uses: actions/upload-artifact@v3
-      with:
-        name: my-current
-        path: ./current.tar.gz
 #  Test:
 #    runs-on: ubuntu-latest
 #
