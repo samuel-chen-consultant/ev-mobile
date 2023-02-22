@@ -16,7 +16,11 @@ jobs:
 #    strategy:
 #      matrix:
 #        node-version: [16.13.0]
+<<<<<<< HEAD
 #
+=======
+
+>>>>>>> parent of 873e1aa3 (Upload Android)
 #    steps:
 #    - uses: actions/checkout@v2
 #    - name: Use Node.js ${{ matrix.node-version }}
@@ -31,17 +35,25 @@ jobs:
 #      run: |
 #        npm run build:prepare
 #        npm run android:assembleDebug
+<<<<<<< HEAD
 #
 #    - uses: actions/upload-artifact@v3
 #      with:
 #        name: my-android
 #        path: android/
+=======
+
+>>>>>>> parent of 873e1aa3 (Upload Android)
   Build-ios:
     runs-on: macos-latest
 
     strategy:
       matrix:
         node-version: [16.13.0]
+<<<<<<< HEAD
+=======
+
+>>>>>>> parent of 873e1aa3 (Upload Android)
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
@@ -51,12 +63,16 @@ jobs:
     - name: npm install
       run: npm clean-install
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> parent of 873e1aa3 (Upload Android)
     - name: npm run pod:install
       run: npm run pod:install
     - name: xcodebuild
       run: |
         npm run build:prepare
         cd ios && xcodebuild -workspace eMobility.xcworkspace -scheme eMobility -configuration Debug CODE_SIGNING_ALLOWED=NO
+<<<<<<< HEAD
     - name: ios bundle
       run: npm run ios:bundle
     - name: ios release
@@ -99,3 +115,30 @@ jobs:
 #        if: always()
 #        with:
 #          files: test-results/**/*.xml
+=======
+
+  Test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.13.0]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: NDK install
+        run: echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;22.1.7171670"
+      - name: npm install
+        run: npm clean-install
+      - name: npm test
+        run: npm test
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: test-results/**/*.xml
+>>>>>>> parent of 873e1aa3 (Upload Android)
